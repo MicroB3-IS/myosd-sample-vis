@@ -1,0 +1,78 @@
+[webserver]
+port = ":4000"
+
+# register data providers
+[[providers]]
+name = "myosd"           # provider name is referenced from map layers
+type = "postgis"        # the type of data provider. currently only supports postgis
+host = "postgis"      # postgis database host
+port = 5432             # postgis database port
+database = "postgres"       # postgis database name
+user = "postgres"         # postgis database user
+password = ""           # postgis database password
+srid = 4326             # The default srid for this provider. If not provided it will be WebMercator (3857)
+
+[[providers.layers]]
+  name = "samples"
+  #tablename = "myosd.samples"
+  geometry_fieldname = "start_geom"
+  id_fieldname = "myosd_id"
+  srid = 4326
+
+  sql = """
+    SELECT
+      s.myosd_id,
+      o.silva_otu,
+      o.num,
+      label,
+      place_name,
+      max_uncertain,
+      sample_depth,
+      local_date,
+      local_start,
+      local_end,
+      water_temperature,
+      salinity,
+      biome,
+      material,
+      feature,
+      ph,
+      phosphate,
+      nitrite,
+      nitrate,
+      weather_condition,
+      air_temperature,
+      wind_speed,
+      water_depth,
+      kit_arrival_date,
+      other_params,
+      remarks,
+      ena_acc,
+      biosample_acc,
+      curator,
+      curation_remark,
+      submitted,
+      modified,
+      start_geog,
+      ST_AsBinary(start_geom) AS start_geom,
+      campaign
+    FROM
+      myosd.samples s
+    INNER JOIN
+      myosd.otu o
+    ON (s.myosd_id = o.myosd_id)
+    WHERE
+      o.num != 0
+      AND
+      start_geom && !BBOX!
+  """
+
+[[maps]]
+name = "samples"
+
+  [[maps.layers]]
+  provider_layer = "myosd.samples"
+  min_zoom = 0
+  max_zoom = 22
+
+

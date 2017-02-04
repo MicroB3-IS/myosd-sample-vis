@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<style>
+    #menu {
+        background: #fff;
+        position: absolute;
+        z-index: 1;
+        top: 10px;
+        right: 10px;
+        border-radius: 3px;
+        width: 120px;
+        border: 1px solid rgba(0,0,0,0.4);
+        font-family: 'Open Sans', sans-serif;
+    }
+
+    #menu a {
+        font-size: 13px;
+        color: #404040;
+        display: block;
+        margin: 0;
+        padding: 0;
+        padding: 10px;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(0,0,0,0.25);
+        text-align: center;
+    }
+
+    #menu a:last-child {
+        border: none;
+    }
+
+    #menu a:hover {
+        background-color: #f8f8f8;
+        color: #404040;
+    }
+
+    #menu a.active {
+        background-color: #3887be;
+        color: #ffffff;
+    }
+
+    #menu a.active:hover {
+        background: #3074a4;
+    }
+</style>
+
+<nav id="menu"></nav>
+<div id="map"></div>
+
+<script>
+mapboxgl.accessToken = 'pk.eyJ1Ijoic2Vuc2Vib3giLCJhIjoiY2lxajNoYnNsMDBlOWkybmh2ZnhxZmMwZyJ9.inXfNk5nJf92mgUeBIEmtA';
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v9',
+    zoom: 4,
+    center: [9, 51]
+});
+
+map.on('load', function () {
+    map.addSource('samples', {
+        type: 'vector',
+        tiles: ['http://35.156.30.20/maps/samples/{z}/{x}/{y}.pbf']
+    });
+    map.addLayer({
+        'id': 'samples',
+        'type': 'circle',
+        'source': 'samples',
+        'layout': {
+            'visibility': 'visible'
+        },
+        'paint': {
+            //'circle-radius': 3,
+            'circle-radius': {
+              property: 'num',
+              stops: [
+                [0, 2],
+                [25, 8]
+            ]
+            },
+            'circle-color': 'red'
+        },
+        'source-layer': 'samples'
+    }, 'place-city-sm');
+
+  map.on('mousemove', function (e) {
+      var features = map.queryRenderedFeatures(e.point, { layers: ['samples'] });
+      map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
+  });
+});
+
+map.on('click', function (e) {
+    var features = map.queryRenderedFeatures(e.point, { layers: ['samples'] });
+
+    if (!features.length) {
+        return;
+    }
+
+    var feature = features[0];
+
+    // Populate the popup and set its coordinates
+    // based on the feature found.
+    var popup = new mapboxgl.Popup()
+        .setLngLat(feature.geometry.coordinates)
+        //.setHTML("'" + feature.pro + feature.properties.silva_otu + "': " + feature.properties.num + "")
+        .setHTML(`${feature.properties.place_name}: ${feature.properties.num} (${feature.properties.silva_otu})`)
+        .addTo(map);
+});
+
+</script>
+
+</body>
+</html>

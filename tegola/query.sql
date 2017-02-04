@@ -1,0 +1,38 @@
+SELECT
+  "myosd_id",
+  "label",
+  "place_name",
+  "max_uncertain",
+  "sample_depth",
+  "local_date",
+  "local_start"
+  "local_end"
+  "water_temperature"
+  "salinity"
+  "biome"
+  "material"
+  "feature"
+  "ph"
+  "phosphate"
+  "nitrite"
+  "nitrate"
+  "weather_condition"
+  "air_temperature"
+  "wind_speed"
+  "water_depth"
+  "kit_arrival_date"
+  "other_params"
+  "remarks"
+  "ena_acc"
+  "biosample_acc"
+  "curator"
+  "curation_remark"
+  "submitted"
+  "modified"
+  "start_geog"
+  ST_AsBinary("start_geom") AS "start_geom"
+  "campaign"
+FROM
+  myosd.samples
+WHERE
+  "start_geom" && ST_MakeEnvelope(-5.624999999217003,55.77657301338314,-9.411989661254563e-15,52.48278021683286,4326)

@@ -1,0 +1,63 @@
+#!/bin/bash
+
+set -euo pipefail
+
+OLD_IFS=${IFS}
+
+#IFS=','
+
+file=myosd2015-1000-otu-table.csv
+declare -gr OUT_FILE='myosd-otu-count.csv'
+# takes also first out col header
+declare -i COL_NUM=$(head -n 1 ${file} | tr ',' '\n' | wc -l)
+
+#COL_NUM=3
+header=''
+silva_otu='';
+myosd_id=shoot;
+
+
+
+function colcut () {
+    cut -d ',' -s -f 1,"$1" "$2"
+}
+
+function analyse_header () {   
+    IFS=',' read id mid;
+    #echo "mid=${mid}"
+    myosd_id="${mid//_*a/}";
+    myosd_id="${myosd_id//\"MYOSD/}";
+    declare -gx myosd_id="${myosd_id//\"/}";
+    echo "${myosd_id}"    
+}
+
+function cutheader() {
+    head -n 1 $2 | colcut "${1}" '-' 
+}
+
+function cutcol () {
+    #echo "i=$1"
+    tail -n +2 "${2}"| colcut "$1" '-'
+}
+
+
+echo "Column count: ${COL_NUM}"
+echo "myosd_id,silva_otu,num" > "${OUT_FILE}";
+for i in $(seq 2 ${COL_NUM}); do
+    echo "working on head"
+
+    test=$(cutheader "${i}" "${file}" | analyse_header)
+
+    echo "myosdid=${test}"
+
+
+    echo "now rest"
+    while IFS=',' read -r id num; do
+	echo "${test},${id//\"/},$num" >> "${OUT_FILE}";
+   done < <(cutcol "${i}" "${file}")
+
+done;
+
+
+
+

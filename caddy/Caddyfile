@@ -1,0 +1,12 @@
+35.156.30.20:80 {
+  tls off
+  root /srv
+  proxy /maps tegola:4000/maps
+  log stdout
+}
+
+35.156.30.20:80/maps {
+  tls off
+  proxy / tegola:4000/maps
+  log stdout
+}

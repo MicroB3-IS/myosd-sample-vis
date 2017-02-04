@@ -1,0 +1,19 @@
+version: "2"
+
+services:
+  postgis:
+    image: mdillon/postgis:9.5
+  tegola:
+    build:
+      context: ./tegola
+    volumes:
+      - ./tegola/config.toml:/config.toml
+    environment:
+      SQL_DEBUG: EXECUTE_SQL
+  caddy:
+    image: abiosoft/caddy
+    ports:
+      - "80:80"
+    volumes:
+      - ./caddy/Caddyfile:/etc/Caddyfile
+      - ./html:/srv
